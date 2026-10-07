@@ -117,6 +117,7 @@ The research supports the principles: spacing, retrieval practice, interleaving,
 2. Call `buildSession({ mode: "mixed", size: 12 })` on a fresh DB from a scratch `tsx` script. Print `trackId` in order and count adjacent repeats. Then replace `interleaveByTrack` with identity and count again.
 3. Change `reviewBudget` to `size`. What happens to a learner with 50 overdue cards? Argue for or against a cap.
 4. `maybeUnlockNextLevel` is only called when `verdict.correct` is true (`attempts/route.ts`). Construct a sequence of answers where this matters, or prove it can't.
+5. Find the field the database forgets. Goal: explain why `cardFromDb` in `src/lib/fsrs.ts` sets `learning_steps: 0` on every read, and when that matters. **Check:** `grep -n "learning_steps" -r src` prints only the line in `cardFromDb`; `CardRow` and the `user_cards` table have no such column, so a card's position inside its learning steps is reset on every review, and the `as unknown as Card` cast hides it from the compiler. (Added 2026-10-06, after running ts-fsrs 5.2.3 on its own: with the default two learning steps this app uses, keeping, zeroing or dropping the field gave identical due dates for Again/Hard/Good sequences; with four learning steps (`1m, 10m, 1h, 4h`) a zeroed card stayed at the 60-minute step through repeated Good ratings instead of graduating. The bug is latent until someone configures longer steps.) Write down the schema change, the two mapping changes, and what value existing rows should get.
 
 > **Junior vs senior**
 >
